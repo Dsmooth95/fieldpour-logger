@@ -4,6 +4,8 @@ A mobile-friendly web app for logging concrete pours in the field. Crews record 
 
 It works offline: logs are saved on the device and sync to the database automatically when the connection returns.
 
+**Live demo:** https://fieldpour-logger.vercel.app/
+
 ## Features
 
 - **Log entry form** with large touch targets, a slump stepper, cylinder quick-picks, and PASS / REJECT buttons
