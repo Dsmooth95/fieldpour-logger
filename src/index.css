@@ -1,0 +1,8 @@
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body { @apply bg-slate-100 text-slate-900 antialiased; }
+input, select, textarea { @apply min-h-12 w-full rounded-lg border-2 border-slate-400 bg-white px-3 text-lg; }
+input:focus, select:focus, textarea:focus { @apply outline-none border-blue-700 ring-2 ring-blue-300; }
+label.field > span { @apply mb-1 block text-sm font-bold uppercase tracking-wide text-slate-700; }
