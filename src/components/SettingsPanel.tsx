@@ -9,7 +9,7 @@ export default function SettingsPanel({ settings, onSave }: { settings: ProjectS
 
   return (
     <form
-      className="space-y-5 rounded-xl bg-white p-4 shadow"
+      className="plate space-y-5 p-4 pt-5"
       onSubmit={(e) => {
         e.preventDefault()
         onSave({ ...s, mixDesigns: s.mixDesigns.map((m) => m.trim()).filter(Boolean) })
@@ -17,6 +17,8 @@ export default function SettingsPanel({ settings, onSave }: { settings: ProjectS
         setTimeout(() => setSaved(false), 2500)
       }}
     >
+      <h2 className="plate-title -ml-1 -mt-1">Job Site Setup</h2>
+
       <label className="field block">
         <span>Project Name</span>
         <input required value={s.projectName} onChange={(e) => setS({ ...s, projectName: e.target.value })} />
@@ -33,24 +35,28 @@ export default function SettingsPanel({ settings, onSave }: { settings: ProjectS
       </div>
 
       <div>
-        <span className="mb-1 block text-sm font-bold uppercase tracking-wide text-slate-700">Mix Designs</span>
+        <span className="mb-1 block font-display text-base font-extrabold uppercase tracking-widest">Mix Designs</span>
         <div className="space-y-2">
           {s.mixDesigns.map((m, i) => (
             <div key={i} className="flex gap-2">
               <input value={m} onChange={(e) => setMix(i, e.target.value)} />
-              <button type="button" aria-label="Remove mix" onClick={() => setS({ ...s, mixDesigns: s.mixDesigns.filter((_, j) => j !== i) })} className="grid min-h-12 w-14 shrink-0 place-items-center rounded-lg bg-red-100 text-red-700">
+              <button type="button" aria-label="Remove mix" onClick={() => setS({ ...s, mixDesigns: s.mixDesigns.filter((_, j) => j !== i) })} className="btn !w-14 shrink-0 !px-0 bg-reject-light text-reject-dark">
                 <Trash2 />
               </button>
             </div>
           ))}
         </div>
-        <button type="button" onClick={() => setS({ ...s, mixDesigns: [...s.mixDesigns, ''] })} className="mt-2 flex min-h-12 items-center gap-2 rounded-lg border-2 border-slate-500 px-4 font-bold">
+        <button type="button" onClick={() => setS({ ...s, mixDesigns: [...s.mixDesigns, ''] })} className="btn btn-outline mt-2 !border-dashed">
           <Plus /> Add Mix Design
         </button>
       </div>
 
-      <button className="min-h-14 w-full rounded-xl bg-blue-700 text-xl font-extrabold text-white">Save Settings</button>
-      {saved && <p role="status" className="rounded-lg bg-slate-900 p-3 text-center font-bold text-white">Settings saved</p>}
+      <button className="btn btn-hazard !min-h-16 w-full !text-2xl">Save Settings</button>
+      {saved && (
+        <p role="status" className="border-[3px] border-asphalt bg-asphalt p-3 text-center font-display text-xl font-extrabold uppercase tracking-wider text-hazard">
+          Settings saved
+        </p>
+      )}
     </form>
   )
 }

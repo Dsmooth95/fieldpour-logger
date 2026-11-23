@@ -1,5 +1,5 @@
 ﻿import { useRef, useState } from 'react'
-import { Camera, Check, Minus, Plus, X } from 'lucide-react'
+import { Camera, Check, Minus, Plus, TrafficCone, X } from 'lucide-react'
 import { fileToThumbnail } from '../lib/storage'
 import type { NewPourLog, PourStatus, ProjectSettings } from '../types/pour'
 
@@ -9,6 +9,15 @@ interface Props {
   /** Ticket numbers already logged, used to warn about duplicates. */
   existingTickets: string[]
   onSubmit: (log: NewPourLog) => Promise<void>
+}
+
+function Caution({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="-mt-2 flex items-start gap-2 border-2 border-asphalt bg-hazard px-3 py-2 font-display text-base font-extrabold uppercase tracking-wide text-asphalt">
+      <TrafficCone size={20} className="mt-0.5 shrink-0" />
+      <span>{children}</span>
+    </p>
+  )
 }
 
 export default function LogForm({ settings, online, existingTickets, onSubmit }: Props) {
@@ -57,7 +66,9 @@ export default function LogForm({ settings, online, existingTickets, onSubmit }:
   }
 
   return (
-    <form onSubmit={submit} className="space-y-5 rounded-xl bg-white p-4 shadow">
+    <form onSubmit={submit} className="plate space-y-5 p-4 pt-5">
+      <h2 className="plate-title -ml-1 -mt-1">New Truck Ticket</h2>
+
       <label className="field block">
         <span>Truck Ticket #</span>
         <input
@@ -65,10 +76,10 @@ export default function LogForm({ settings, online, existingTickets, onSubmit }:
           value={f.ticketNo}
           onChange={(e) => set('ticketNo', e.target.value)}
           placeholder="Copy from delivery ticket"
-          className={duplicateTicket ? '!border-amber-500 !bg-amber-50' : ''}
+          className={`font-mono tracking-wider ${duplicateTicket ? '!border-cone !bg-hazard-light' : ''}`}
         />
       </label>
-      {duplicateTicket && <p className="-mt-3 text-sm font-bold text-amber-700">Ticket {f.ticketNo.trim()} is already logged. Check for a duplicate before submitting.</p>}
+      {duplicateTicket && <Caution>Ticket {f.ticketNo.trim()} is already logged. Check for a duplicate before submitting.</Caution>}
 
       <label className="field block">
         <span>Mix Design</span>
@@ -92,34 +103,35 @@ export default function LogForm({ settings, online, existingTickets, onSubmit }:
             required
             value={f.tempF}
             onChange={(e) => set('tempF', e.target.value)}
-            className={tooHot ? '!border-red-600 !bg-red-50' : ''}
+            className={tooHot ? '!border-reject !bg-reject-light !text-reject-dark' : ''}
           />
         </label>
       </div>
-      {tooHot && <p className="-mt-3 text-sm font-bold text-red-700">Over max allowable temp ({settings.maxTempF}°F)</p>}
+      {tooHot && <Caution>Over max allowable temp ({settings.maxTempF}°F)</Caution>}
 
       <div className="field">
-        <span className="mb-1 block text-sm font-bold uppercase tracking-wide text-slate-700">Slump (in)</span>
+        <span className="mb-1 block font-display text-base font-extrabold uppercase tracking-widest">Slump (in)</span>
         <div className="flex gap-2">
-          <button type="button" onClick={() => step(-0.25)} className="grid min-h-12 w-16 place-items-center rounded-lg bg-slate-800 text-white active:bg-slate-600" aria-label="Decrease slump">
-            <Minus />
+          <button type="button" onClick={() => step(-0.25)} className="btn btn-dark !w-16 shrink-0 !px-0" aria-label="Decrease slump">
+            <Minus strokeWidth={3} />
           </button>
-          <input type="number" inputMode="decimal" step="0.25" min="0" value={f.slumpIn} onChange={(e) => set('slumpIn', Number(e.target.value))} className="text-center font-bold" />
-          <button type="button" onClick={() => step(0.25)} className="grid min-h-12 w-16 place-items-center rounded-lg bg-slate-800 text-white active:bg-slate-600" aria-label="Increase slump">
-            <Plus />
+          <input type="number" inputMode="decimal" step="0.25" min="0" value={f.slumpIn} onChange={(e) => set('slumpIn', Number(e.target.value))} className="text-center font-mono !text-2xl" />
+          <button type="button" onClick={() => step(0.25)} className="btn btn-dark !w-16 shrink-0 !px-0" aria-label="Increase slump">
+            <Plus strokeWidth={3} />
           </button>
         </div>
       </div>
 
       <div>
-        <span className="mb-1 block text-sm font-bold uppercase tracking-wide text-slate-700">Cylinders Cast</span>
+        <span className="mb-1 block font-display text-base font-extrabold uppercase tracking-widest">Cylinders Cast</span>
         <div className="grid grid-cols-4 gap-2">
           {[0, 2, 4, 6].map((n) => (
             <button
               type="button"
               key={n}
               onClick={() => set('cylinders', n)}
-              className={`min-h-12 rounded-full border-2 text-lg font-bold ${f.cylinders === n ? 'border-blue-700 bg-blue-700 text-white' : 'border-slate-400 bg-white'}`}
+              aria-pressed={f.cylinders === n}
+              className={`btn !min-h-14 !text-3xl ${f.cylinders === n ? 'btn-hazard !shadow-none translate-x-0.5 translate-y-0.5' : 'btn-outline'}`}
             >
               {n}
             </button>
@@ -131,21 +143,23 @@ export default function LogForm({ settings, online, existingTickets, onSubmit }:
         <button
           type="button"
           onClick={() => set('status', 'PASS')}
-          className={`flex min-h-16 items-center justify-center gap-2 rounded-xl text-2xl font-extrabold ${f.status === 'PASS' ? 'bg-green-600 text-white ring-4 ring-green-300' : 'bg-green-100 text-green-800'}`}
+          aria-pressed={f.status === 'PASS'}
+          className={`btn !min-h-16 !text-3xl ${f.status === 'PASS' ? 'bg-pass text-white ring-4 ring-hazard' : 'bg-pass-light text-pass-dark'}`}
         >
-          <Check size={28} /> PASS
+          <Check size={30} strokeWidth={3.5} /> PASS
         </button>
         <button
           type="button"
           onClick={() => set('status', 'REJECT')}
-          className={`flex min-h-16 items-center justify-center gap-2 rounded-xl text-2xl font-extrabold ${f.status === 'REJECT' ? 'bg-red-600 text-white ring-4 ring-red-300' : 'bg-red-100 text-red-800'}`}
+          aria-pressed={f.status === 'REJECT'}
+          className={`btn !min-h-16 !text-3xl ${f.status === 'REJECT' ? 'bg-reject text-white ring-4 ring-hazard' : 'bg-reject-light text-reject-dark'}`}
         >
-          <X size={28} /> REJECT
+          <X size={30} strokeWidth={3.5} /> REJECT
         </button>
       </div>
 
       <div>
-        <span className="mb-1 block text-sm font-bold uppercase tracking-wide text-slate-700">Delivery Ticket Photo</span>
+        <span className="mb-1 block font-display text-base font-extrabold uppercase tracking-widest">Delivery Ticket Photo</span>
         <input
           ref={fileRef}
           type="file"
@@ -158,10 +172,10 @@ export default function LogForm({ settings, online, existingTickets, onSubmit }:
           }}
         />
         <div className="flex items-center gap-3">
-          <button type="button" onClick={() => fileRef.current?.click()} className="flex min-h-12 items-center gap-2 rounded-lg border-2 border-dashed border-slate-500 px-4 font-bold">
+          <button type="button" onClick={() => fileRef.current?.click()} className="btn btn-outline !border-dashed">
             <Camera /> {f.photo ? 'Retake' : 'Add Photo'}
           </button>
-          {f.photo && <img src={f.photo} alt="Ticket preview" className="h-14 w-14 rounded-lg border object-cover" />}
+          {f.photo && <img src={f.photo} alt="Ticket preview" className="h-14 w-14 border-[3px] border-asphalt object-cover shadow-plate-sm" />}
         </div>
       </div>
 
@@ -170,10 +184,14 @@ export default function LogForm({ settings, online, existingTickets, onSubmit }:
         <input value={f.notes} onChange={(e) => set('notes', e.target.value)} placeholder="Optional" />
       </label>
 
-      <button disabled={busy} className="min-h-14 w-full rounded-xl bg-blue-700 text-xl font-extrabold text-white active:bg-blue-900 disabled:opacity-50">
+      <button disabled={busy} className="btn btn-hazard !min-h-16 w-full !text-2xl">
         {busy ? 'Saving…' : online ? 'Submit Log' : 'Save to Offline Queue'}
       </button>
-      {toast && <p role="status" className="rounded-lg bg-slate-900 p-3 text-center font-bold text-white">{toast}</p>}
+      {toast && (
+        <p role="status" className="border-[3px] border-asphalt bg-asphalt p-3 text-center font-display text-xl font-extrabold uppercase tracking-wider text-hazard">
+          {toast}
+        </p>
+      )}
     </form>
   )
 }

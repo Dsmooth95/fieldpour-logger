@@ -66,7 +66,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen pb-24">
+    <div className="min-h-screen pb-28">
       <Header
         projectName={settings.projectName}
         online={online}
@@ -90,17 +90,23 @@ export default function App() {
           </div>
         )}
       </main>
-      <nav className="fixed inset-x-0 bottom-0 z-10 grid grid-cols-3 border-t-2 border-slate-900 bg-white">
-        {TABS.map(({ id, label, Icon }) => (
-          <button
-            key={id}
-            onClick={() => setTab(id)}
-            className={`flex min-h-16 flex-col items-center justify-center gap-0.5 text-sm font-bold ${tab === id ? 'bg-slate-900 text-white' : 'text-slate-800'}`}
-          >
-            <Icon size={24} />
-            {label}
-          </button>
-        ))}
+      <nav className="fixed inset-x-0 bottom-0 z-10 bg-asphalt">
+        <div className="hazard-stripe h-2 border-y-2 border-asphalt" aria-hidden />
+        <div className="mx-auto grid max-w-5xl grid-cols-3">
+          {TABS.map(({ id, label, Icon }) => (
+            <button
+              key={id}
+              onClick={() => setTab(id)}
+              aria-current={tab === id ? 'page' : undefined}
+              className={`flex min-h-16 flex-col items-center justify-center gap-0.5 border-r-2 border-asphalt-mid font-display text-base font-extrabold uppercase tracking-widest last:border-r-0 ${
+                tab === id ? 'bg-hazard text-asphalt' : 'text-concrete hover:bg-asphalt-soft'
+              }`}
+            >
+              <Icon size={24} strokeWidth={2.5} />
+              {label}
+            </button>
+          ))}
+        </div>
       </nav>
     </div>
   )
