@@ -155,9 +155,13 @@ export function fileToThumbnail(file: File, max = 480): Promise<string> {
 
 const csvCell = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`
 
-export function exportCsv(logs: PourLog[], projectName: string) {
+/** Export today's logs (local time) as CSV. Returns the number of rows exported. */
+export function exportCsv(logs: PourLog[], projectName: string): number {
+  const today = new Date().toDateString()
+  const todays = logs.filter((l) => new Date(l.createdAt).toDateString() === today)
+  if (!todays.length) return 0
   const head = ['Ticket', 'Time', 'Mix Design', 'Cubic Yards', 'Slump (in)', 'Temp (F)', 'Cylinders', 'Status', 'Synced', 'Notes']
-  const rows = [...logs].reverse().map((l) =>
+  const rows = [...todays].reverse().map((l) =>
     [l.ticketNo, new Date(l.createdAt).toLocaleString(), l.mixDesign, l.cubicYards, l.slumpIn, l.tempF, l.cylinders, l.status, l.synced ? 'Yes' : 'No', l.notes].map(csvCell).join(','),
   )
   const csv = [head.map(csvCell).join(','), ...rows].join('\r\n')
@@ -166,4 +170,5 @@ export function exportCsv(logs: PourLog[], projectName: string) {
   a.download = `${projectName.replace(/[^\w-]+/g, '_')}_${new Date().toISOString().slice(0, 10)}.csv`
   a.click()
   URL.revokeObjectURL(a.href)
+  return todays.length
 }

@@ -80,7 +80,7 @@ export default function App() {
       <main className="mx-auto max-w-5xl p-4">
         {tab === 'log' && (
           <div className="mx-auto max-w-xl">
-            <LogForm settings={settings} online={online} onSubmit={handleSubmit} />
+            <LogForm settings={settings} online={online} existingTickets={logs.map((l) => l.ticketNo)} onSubmit={handleSubmit} />
           </div>
         )}
         {tab === 'dashboard' && <Dashboard logs={logs} settings={settings} />}

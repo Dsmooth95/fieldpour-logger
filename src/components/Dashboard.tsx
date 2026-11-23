@@ -35,7 +35,11 @@ export default function Dashboard({ logs, settings }: { logs: PourLog[]; setting
 
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-extrabold">Live Feed</h2>
-        <button onClick={() => exportCsv(logs, settings.projectName)} className="flex min-h-12 items-center gap-2 rounded-lg bg-slate-900 px-4 font-bold text-white">
+        <button
+          onClick={() => {
+            if (!exportCsv(logs, settings.projectName)) alert("No logs recorded today, so there's nothing to export.")
+          }}
+          className="flex min-h-12 items-center gap-2 rounded-lg bg-slate-900 px-4 font-bold text-white">
           <Download size={20} /> Export Daily CSV Report
         </button>
       </div>

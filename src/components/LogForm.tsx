@@ -6,14 +6,14 @@ import type { NewPourLog, PourStatus, ProjectSettings } from '../types/pour'
 interface Props {
   settings: ProjectSettings
   online: boolean
+  /** Ticket numbers already logged, used to warn about duplicates. */
+  existingTickets: string[]
   onSubmit: (log: NewPourLog) => Promise<void>
 }
 
-const nextTicket = () => `TK-${Math.floor(100 + Math.random() * 900)}`
-
-export default function LogForm({ settings, online, onSubmit }: Props) {
+export default function LogForm({ settings, online, existingTickets, onSubmit }: Props) {
   const fresh = () => ({
-    ticketNo: nextTicket(),
+    ticketNo: '', // typed in from the batch plant's delivery ticket
     mixDesign: settings.mixDesigns[0] ?? '',
     cubicYards: '10',
     slumpIn: 5.5,
@@ -31,6 +31,8 @@ export default function LogForm({ settings, online, onSubmit }: Props) {
   const set = <K extends keyof ReturnType<typeof fresh>>(k: K, v: ReturnType<typeof fresh>[K]) => setF((p) => ({ ...p, [k]: v }))
   const step = (d: number) => set('slumpIn', Math.max(0, Math.round((f.slumpIn + d) * 4) / 4))
   const tooHot = Number(f.tempF) > settings.maxTempF
+  const ticketKey = f.ticketNo.trim().toLowerCase()
+  const duplicateTicket = ticketKey !== '' && existingTickets.some((t) => t.trim().toLowerCase() === ticketKey)
   const mixes = settings.mixDesigns.includes(f.mixDesign) ? settings.mixDesigns : [f.mixDesign, ...settings.mixDesigns]
 
   async function submit(e: React.FormEvent) {
@@ -58,8 +60,15 @@ export default function LogForm({ settings, online, onSubmit }: Props) {
     <form onSubmit={submit} className="space-y-5 rounded-xl bg-white p-4 shadow">
       <label className="field block">
         <span>Truck Ticket #</span>
-        <input required value={f.ticketNo} onChange={(e) => set('ticketNo', e.target.value)} placeholder="TK-104" />
+        <input
+          required
+          value={f.ticketNo}
+          onChange={(e) => set('ticketNo', e.target.value)}
+          placeholder="Copy from delivery ticket"
+          className={duplicateTicket ? '!border-amber-500 !bg-amber-50' : ''}
+        />
       </label>
+      {duplicateTicket && <p className="-mt-3 text-sm font-bold text-amber-700">Ticket {f.ticketNo.trim()} is already logged. Check for a duplicate before submitting.</p>}
 
       <label className="field block">
         <span>Mix Design</span>

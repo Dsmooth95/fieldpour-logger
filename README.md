@@ -2,19 +2,20 @@
 
 A mobile-friendly web app for logging concrete pours in the field. Crews record each truck's ticket number, mix design, volume, slump, temperature, cylinders cast, and pass/reject status, and can attach a photo of the delivery ticket. A dashboard tracks progress against the pour target.
 
-It works offline: logs are saved on the device and sync to the database automatically when the connection returns.
+If the connection drops while the app is open, new logs are saved on the device and sync to the database automatically when the connection returns. (The app itself does not yet load without a connection. See [Known limitations](#known-limitations).)
 
 **Live demo:** https://fieldpour-logger.vercel.app/
 
 ## Features
 
 - **Log entry form** with large touch targets, a slump stepper, cylinder quick-picks, and PASS / REJECT buttons
-- **Temperature warning** when concrete temp exceeds the project's max allowable
+- **Typed-in ticket numbers** (copied from the batch plant's delivery ticket) with a warning when a ticket is already logged
+- **Temperature warning** when concrete temp exceeds the project's max allowable. PASS / REJECT is always the crew's call; nothing is enforced automatically
 - **Delivery ticket photos**, resized on the device before upload
 - **Offline queue** with auto-sync on reconnect and a manual **Sync Now** button
 - **Simulate Offline** switch for demoing the queue without disconnecting
 - **Dashboard** with poured vs. target cubic yards, pass rate, truck count, cylinders cast, and a live feed
-- **CSV export** of the daily log
+- **CSV export** of today's logs
 - **Settings** for project name, target volume, max temp, and mix designs
 - **Mock mode**: with no Supabase keys the app runs entirely on `localStorage`, seeded with sample data
 
@@ -67,6 +68,17 @@ The variable names must start with `VITE_`, or Vite will not expose them to the 
 ## How offline sync works
 
 Every new log is written to `localStorage` first, marked as unsynced, and then pushed to Supabase if the device is online. Anything that fails to push stays queued and is retried on the next sync. Syncing uses `upsert` keyed on the log's UUID, so retries never create duplicates. Photos are stored as small JPEG data URLs while queued, then uploaded to the `tickets` bucket on sync.
+
+## Known limitations
+
+This is a demo, not a finished field tool. Known gaps:
+
+- **The app shell isn't cached.** There is no service worker or web app manifest, so the page won't load at all if it's opened with no signal. The offline queue only works if the app was already open when the connection dropped.
+- **Queued data lives in `localStorage` (about 5 MB).** Photos are large, and if the quota fills, the app keeps new logs in memory only, so a reload could lose logs that haven't synced yet. IndexedDB would remove this limit.
+- **Settings are per device.** Project name, target volume, max temp, and mix designs are stored on each phone, so two crew members can see different values.
+- **Slump isn't checked.** Only temperature is compared against a limit. There are no min/max slump values per mix design.
+- **Logs can't be edited or deleted.** A typo in a submitted log is permanent from within the app.
+- **No authentication.** See the security notice below.
 
 ## Security notice
 
